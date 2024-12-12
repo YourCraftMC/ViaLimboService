@@ -1,4 +1,4 @@
-package com.loohp;
+package com.loohp.vialimbo;
 
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.Listener;
@@ -33,6 +33,7 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             ServerProperties serverProperties = Limbo.getInstance().getServerProperties();
             String ip = serverProperties.getServerIp();
             int port = serverProperties.getServerPort();
+            boolean bungeecord = serverProperties.isBungeecord() || serverProperties.isBungeeGuard();
 
             Field portField = ServerProperties.class.getDeclaredField("serverPort");
             portField.setAccessible(true);
@@ -44,7 +45,7 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             Limbo.getInstance().getScheduler().runTask(this, () -> {
                 String minecraftVersion = Limbo.getInstance().SERVER_IMPLEMENTATION_VERSION;
                 int limboPort = Limbo.getInstance().getServerConnection().getServerSocket().getLocalPort();
-                startViaProxy(ip, port, minecraftVersion, limboPort);
+                startViaProxy(ip, port, minecraftVersion, limboPort, bungeecord);
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -56,7 +57,7 @@ public class ViaLimbo extends LimboPlugin implements Listener {
         stopViaProxy();
     }
 
-    private void startViaProxy(String ip, int port, String minecraftVersion, int limboPort) {
+    private void startViaProxy(String ip, int port, String minecraftVersion, int limboPort, boolean bungeecord) {
         try {
             Limbo.getInstance().getConsole().sendMessage("[ViaLimbo] Initializing ViaProxy " + ViaProxy.VERSION + " (" + ViaProxy.IMPL_VERSION + ")");
 
@@ -64,10 +65,13 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             AbstractFilter filter = new AbstractFilter() {
                 @Override
                 public Filter.Result filter(LogEvent event) {
-                    if (!event.getLoggerName().contains("Via")) {
+                    String logger = event.getLoggerName();
+                    if (!logger.contains("Via")) {
                         return Result.NEUTRAL;
                     }
-                    Limbo.getInstance().getConsole().sendMessage("[ViaLimbo] (" + event.getLoggerName() + ") " + event.getMessage().getFormattedMessage());
+                    if (!logger.equals("ViaProxy")) {
+                        Limbo.getInstance().getConsole().sendMessage("[ViaLimbo] (" + event.getLoggerName() + ") " + event.getMessage().getFormattedMessage());
+                    }
                     return Result.DENY;
                 }
             };
@@ -96,6 +100,8 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             config.setBindAddress(new InetSocketAddress(ip, port));
             config.setTargetAddress(new InetSocketAddress("127.0.0.1", limboPort));
             config.setTargetVersion(ProtocolVersion.getClosest(minecraftVersion));
+            config.setPassthroughBungeecordPlayerInfo(bungeecord);
+            config.setAllowLegacyClientPassthrough(true);
 
             Method loadNettyMethod = ViaProxy.class.getDeclaredMethod("loadNetty");
             loadNettyMethod.setAccessible(true);
