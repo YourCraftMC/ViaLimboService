@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.loohp</groupId>
-    <artifactId>ViaLimbo</artifactId>
+    <artifactId>ViaLimboService</artifactId>
     <version>1.0.0</version>
 
     <properties>
@@ -96,7 +96,8 @@
             <groupId>com.loohp</groupId>
             <artifactId>Limbo</artifactId>
             <version>0.7.12-ALPHA</version>
-            <scope>provided</scope>
+            <systemPath>${project.basedir}/libs/Limbo-0.7.12-ALPHA-1.21.4.jar</systemPath>
+            <scope>system</scope>
         </dependency>
         <dependency>
             <groupId>net.raphimc</groupId>

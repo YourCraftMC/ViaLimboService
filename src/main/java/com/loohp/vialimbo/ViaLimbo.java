@@ -1,20 +1,18 @@
 package com.loohp.vialimbo;
 
+import cn.ycraft.limbo.config.ServerConfig;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.Listener;
-import com.loohp.limbo.events.connection.ConnectionEstablishedEvent;
-import com.loohp.limbo.file.ServerProperties;
-import com.loohp.limbo.network.Channel;
-import com.loohp.limbo.network.ClientConnection;
 import com.loohp.limbo.plugins.LimboPlugin;
-import com.loohp.limbo.utils.DataTypeIO;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import io.netty.buffer.ByteBuf;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.additionalclassprovider.GuavaClassPathProvider;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
+import net.lenni0451.lambdaevents.EventHandler;
 import net.lenni0451.optconfig.ConfigLoader;
 import net.lenni0451.optconfig.provider.ConfigProvider;
 import net.lenni0451.reflect.Agents;
@@ -25,20 +23,17 @@ import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.ClassLoaderPriorityUtil;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.filter.AbstractFilter;
+import org.geysermc.mcprotocollib.network.server.NetworkServer;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Set;
 
@@ -47,25 +42,27 @@ public class ViaLimbo extends LimboPlugin implements Listener {
     @Override
     public void onEnable() {
         try {
-            ServerProperties serverProperties = Limbo.getInstance().getServerProperties();
-            String ip = serverProperties.getServerIp();
-            int port = serverProperties.getServerPort();
-            boolean bungeecord = serverProperties.isBungeecord() || serverProperties.isBungeeGuard();
+            String ip = ServerConfig.SERVER_IP.getNotNull();
+            int port = ServerConfig.SERVER_PORT.getNotNull();
+            boolean bungeecord = ServerConfig.BUNGEECORD.getNotNull() || ServerConfig.BUNGEE_GUARD.getNotNull();
 
-            Field portField = ServerProperties.class.getDeclaredField("serverPort");
-            portField.setAccessible(true);
-            portField.setInt(serverProperties, 0);
-            Field ipField = ServerProperties.class.getDeclaredField("serverIp");
-            ipField.setAccessible(true);
-            ipField.set(serverProperties, "127.0.0.1");
+            Limbo.getInstance().setBindIp("127.0.0.1");
+            Limbo.getInstance().setBindPort(0);
 
-            Limbo.getInstance().getEventsManager().registerEvents(this, new ViaLimboListener());
 
-            Limbo.getInstance().getScheduler().runTask(this, () -> {
+            Limbo.getInstance().getScheduler().runTaskLater(this, () -> {
                 String minecraftVersion = Limbo.getInstance().SERVER_IMPLEMENTATION_VERSION;
-                int limboPort = Limbo.getInstance().getServerConnection().getServerSocket().getLocalPort();
-                startViaProxy(ip, port, minecraftVersion, limboPort, bungeecord);
-            });
+                NetworkServer server = Limbo.getInstance().getServerConnection().getServer();
+                try {
+                    Field channelField = NetworkServer.class.getDeclaredField("channel");
+                    channelField.setAccessible(true);
+                    io.netty.channel.Channel channel = (io.netty.channel.Channel) channelField.get(server);
+                    int limboPort = ((InetSocketAddress) channel.localAddress()).getPort();
+                    startViaProxy(ip, port, minecraftVersion, limboPort, bungeecord);
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }, 2);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -80,10 +77,10 @@ public class ViaLimbo extends LimboPlugin implements Listener {
         try {
             Limbo.getInstance().getConsole().sendMessage("[ViaLimbo] Initializing ViaProxy " + ViaProxy.VERSION + " (" + ViaProxy.IMPL_VERSION + ")");
 
-            org.apache.logging.log4j.Logger logger = LogManager.getRootLogger();
+            Logger logger = LogManager.getRootLogger();
             AbstractFilter filter = new AbstractFilter() {
                 @Override
-                public Filter.Result filter(LogEvent event) {
+                public Result filter(LogEvent event) {
                     String logger = event.getLoggerName();
                     if (!logger.contains("Via")) {
                         return Result.NEUTRAL;
@@ -111,7 +108,8 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             cwdField.setAccessible(true);
             cwdField.set(null, getDataFolder());
 
-            ViaProxyConfig config = configLoader.load(ConfigProvider.memory("", s -> {})).getConfigInstance();
+            ViaProxyConfig config = configLoader.load(ConfigProvider.memory("", s -> {
+            })).getConfigInstance();
             Field configField = ViaProxy.class.getDeclaredField("CONFIG");
             configField.setAccessible(true);
             configField.set(null, config);
@@ -151,49 +149,21 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             this.initializedChannels = Collections.newSetFromMap(cache.asMap());
         }
 
-        @net.lenni0451.lambdaevents.EventHandler
+        @EventHandler
         public void onProxy2ServerChannelInitialize(Proxy2ServerChannelInitializeEvent event) {
             io.netty.channel.Channel channel = event.getChannel();
             if (initializedChannels.add(channel)) {
                 ProxyConnection proxyConnection = ProxyConnection.fromChannel(channel);
                 SocketAddress socketAddress = proxyConnection.getC2P().remoteAddress();
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-                try {
-                    if (socketAddress instanceof InetSocketAddress) {
-                        dataOutputStream.writeBoolean(true);
-                        DataTypeIO.writeString(dataOutputStream, ((InetSocketAddress) socketAddress).getAddress().getHostAddress(), StandardCharsets.UTF_8);
-                    } else {
-                        dataOutputStream.writeBoolean(false);
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                ByteBuf buf = channel.alloc().buffer();
+                if (socketAddress instanceof InetSocketAddress) {
+                    buf.writeBoolean(true);
+                    MinecraftTypes.writeString(buf, ((InetSocketAddress) socketAddress).getAddress().getHostAddress());
+                } else {
+                    buf.writeBoolean(false);
                 }
-                channel.unsafe().write(channel.alloc().buffer().writeBytes(byteArrayOutputStream.toByteArray()), channel.voidPromise());
+                channel.writeAndFlush(buf);
             }
         }
-
     }
-
-    public static class ViaLimboListener implements Listener {
-
-        @com.loohp.limbo.events.EventHandler
-        public void onConnectionEstablished(ConnectionEstablishedEvent event) {
-            try {
-                Field inputField = Channel.class.getDeclaredField("input");
-                inputField.setAccessible(true);
-                DataInputStream inputStream = (DataInputStream) inputField.get(event.getConnection().getChannel());
-                if (inputStream.readBoolean()) {
-                    String host = DataTypeIO.readString(inputStream, StandardCharsets.UTF_8);
-                    Field addressField = ClientConnection.class.getDeclaredField("inetAddress");
-                    addressField.setAccessible(true);
-                    addressField.set(event.getConnection(), InetAddress.getByName(host));
-                }
-            } catch (NoSuchFieldException | IllegalAccessException | IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-    }
-
 }
