@@ -49,6 +49,7 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             Limbo.getInstance().setBindIp("127.0.0.1");
             Limbo.getInstance().setBindPort(0);
 
+            Limbo.getInstance().setOnlineMode(false);
 
             Limbo.getInstance().getScheduler().runTaskLater(this, () -> {
                 String minecraftVersion = Limbo.getInstance().SERVER_IMPLEMENTATION_VERSION;
