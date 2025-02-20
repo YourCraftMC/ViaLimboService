@@ -1,11 +1,13 @@
 package com.loohp.vialimbo;
 
 import cn.ycraft.limbo.config.ServerConfig;
+import cn.ycraft.limbo.network.ServerConnection;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.Listener;
 import com.loohp.limbo.plugins.LimboPlugin;
+import com.loohp.limbo.scheduler.LimboRunnable;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import net.lenni0451.classtransform.TransformerManager;
@@ -51,19 +53,27 @@ public class ViaLimbo extends LimboPlugin implements Listener {
 
             Limbo.getInstance().setOnlineMode(false);
 
-            Limbo.getInstance().getScheduler().runTaskLater(this, () -> {
-                String minecraftVersion = Limbo.getInstance().SERVER_IMPLEMENTATION_VERSION;
-                NetworkServer server = Limbo.getInstance().getServerConnection().getServer();
-                try {
-                    Field channelField = NetworkServer.class.getDeclaredField("channel");
-                    channelField.setAccessible(true);
-                    io.netty.channel.Channel channel = (io.netty.channel.Channel) channelField.get(server);
-                    int limboPort = ((InetSocketAddress) channel.localAddress()).getPort();
-                    startViaProxy(ip, port, minecraftVersion, limboPort, bungeecord);
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    throw new RuntimeException(e);
+            new LimboRunnable() {
+                @Override
+                public void run() {
+                    String minecraftVersion = Limbo.getInstance().SERVER_IMPLEMENTATION_VERSION;
+                    ServerConnection serverConnection = Limbo.getInstance().getServerConnection();
+                    if (serverConnection == null) {
+                        return;
+                    }
+                    NetworkServer server = serverConnection.getServer();
+                    try {
+                        Field channelField = NetworkServer.class.getDeclaredField("channel");
+                        channelField.setAccessible(true);
+                        io.netty.channel.Channel channel = (io.netty.channel.Channel) channelField.get(server);
+                        int limboPort = ((InetSocketAddress) channel.localAddress()).getPort();
+                        startViaProxy(ip, port, minecraftVersion, limboPort, bungeecord);
+                        cancel();
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }, 2);
+            }.runTaskTimer(this, 1, 1);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
