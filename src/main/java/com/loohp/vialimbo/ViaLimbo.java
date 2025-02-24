@@ -44,12 +44,12 @@ public class ViaLimbo extends LimboPlugin implements Listener {
     @Override
     public void onEnable() {
         try {
-            String ip = ServerConfig.SERVER_IP.getNotNull();
-            int port = ServerConfig.SERVER_PORT.getNotNull();
-            boolean bungeecord = ServerConfig.BUNGEECORD.getNotNull() || ServerConfig.BUNGEE_GUARD.getNotNull();
+            String ip = ServerConfig.SERVER.HOST.getNotNull();
+            int port = ServerConfig.SERVER.PORT.getNotNull();
+            boolean bungeecord = ServerConfig.PROXY.BUNGEECORD.getNotNull() || ServerConfig.PROXY.BUNGEE_GUARD.getNotNull();
 
-            Limbo.getInstance().setBindIp("127.0.0.1");
-            Limbo.getInstance().setBindPort(0);
+            Limbo.getInstance().setServerHost("127.0.0.1");
+            Limbo.getInstance().setServerPort(0);
 
             Limbo.getInstance().setOnlineMode(false);
 

@@ -96,7 +96,7 @@
             <groupId>com.loohp</groupId>
             <artifactId>Limbo</artifactId>
             <version>0.7.12-ALPHA</version>
-            <systemPath>${project.basedir}/libs/Limbo-0.7.12-ALPHA-1.21.4.jar</systemPath>
+            <systemPath>${project.basedir}/libs/limboservice-1.0.0-SNAPSHOT-1.21.4.jar</systemPath>
             <scope>system</scope>
         </dependency>
         <dependency>
