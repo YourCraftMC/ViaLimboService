@@ -56,7 +56,12 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             new LimboRunnable() {
                 @Override
                 public void run() {
-                    String minecraftVersion = Limbo.getInstance().SERVER_IMPLEMENTATION_VERSION;
+                    String minecraftVersion = null;
+                    try {
+                        minecraftVersion = (String) Limbo.class.getField("SERVER_IMPLEMENTATION_VERSION").get(Limbo.getInstance());
+                    } catch (IllegalAccessException | NoSuchFieldException e) {
+                        throw new RuntimeException(e);
+                    }
                     ServerConnection serverConnection = Limbo.getInstance().getServerConnection();
                     if (serverConnection == null) {
                         return;
