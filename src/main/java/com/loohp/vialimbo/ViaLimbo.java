@@ -114,7 +114,6 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             TransformerManager transformerManager = new TransformerManager(classProvider);
             transformerManager.addTransformerPreprocessor(new MixinsTranslator());
             transformerManager.addTransformer("net.raphimc.viaproxy.injection.mixins.**");
-            transformerManager.hookInstrumentation(Agents.getInstrumentation());
 
             ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
             configLoader.getConfigOptions().setResetInvalidOptions(true).setRewriteConfig(true).setCommentSpacing(1);
