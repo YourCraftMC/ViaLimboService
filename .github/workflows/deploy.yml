@@ -26,8 +26,8 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_TOKEN
 
-      - name: "Maven Deploy"
-        run: mvn -B -Pgithub deploy -DskipTests
+      - name: "Maven Packaging"
+        run: mvn -B -Pgithub package -DskipTests
         env:
           MAVEN_USERNAME: ${{ github.repository_owner }}
           MAVEN_TOKEN: ${{secrets.GITHUB_TOKEN}}
