@@ -16,23 +16,23 @@ This is a [LimboService](https://github.com/YourCraftMC/LimboService) plugin, yo
 2. Place the downloaded JAR file into the `plugins` folder of your LimboService server.
 3. Restart your LimboService server to load the plugin.
 
-## Note
-
-Currently, this plugin may output some errors like:
-```console
-[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized format specifier [ip_redactor]
-[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized conversion specifier [ip_redactor] starting at position 27 in conversion pattern.
-[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized format specifier [ip_redactor]
-[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized conversion specifier [ip_redactor] starting at position 67 in conversion pattern.
-[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized format specifier [ip_redactor]
-[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized conversion specifier [ip_redactor] starting at position 64 in conversion pattern.
-[XX:XX:XX Error] ... Thread-0 WARN The use of package scanning to locate Log4j plugins is deprecated.
-Please remove the deprecated `PluginManager.addPackage()` method call from `net.raphimc.viaproxy.util.logging.Logger.<clinit>(Logger.java:35)`.
-See https://logging.apache.org/log4j/2.x/faq.html#package-scanning for details.
-```
-This is caused by the ViaProxy's Log4j2 configuration, 
-which is not compatible with the ViaLimboService's Log4j2 configuration,
-but it does not affect the functionality of the plugin, **just ignore it**.
+> [!WARNING]
+> Currently, this plugin may output some errors like:
+> ```console
+> [XX:XX:XX Error] ... Thread-0 ERROR Unrecognized format specifier [ip_redactor]
+> [XX:XX:XX Error] ... Thread-0 ERROR Unrecognized conversion specifier [ip_redactor] starting at position 27 in conversion pattern.
+> [XX:XX:XX Error] ... Thread-0 ERROR Unrecognized format specifier [ip_redactor]
+> [XX:XX:XX Error] ... Thread-0 ERROR Unrecognized conversion specifier [ip_redactor] starting at position 67 in conversion pattern.
+> [XX:XX:XX Error] ... Thread-0 ERROR Unrecognized format specifier [ip_redactor]
+> [XX:XX:XX Error] ... Thread-0 ERROR Unrecognized conversion specifier [ip_redactor] starting at position 64 in conversion pattern.
+> [XX:XX:XX Error] ... Thread-0 WARN The use of package scanning to locate Log4j plugins is deprecated.
+> Please remove the deprecated `PluginManager.addPackage()` method call from `net.raphimc.viaproxy.util.logging.Logger.<clinit>(Logger.java:35)`.
+> See https://logging.apache.org/log4j/2.x/faq.html#package-scanning for details.
+> ```
+> 
+> This is caused by the ViaProxy's [Log4j2](https://logging.apache.org/log4j/2.x/faq.html#package-scanning) configuration,
+> which is incompatible with the ViaLimboService's Log4j2,
+> but it does not affect the functionality of the plugin, everything is ok, so **JUST IGNORE IT**.
 
 ## Acknowledgements & Supports
 
