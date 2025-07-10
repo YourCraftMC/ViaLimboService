@@ -7,6 +7,24 @@ integrating [ViaProxy](https://github.com/ViaVersion/ViaProxy) for more Minecraf
 > This project is forked from [LOOHP's ViaLimbo](https://github.com/LOOHP/ViaLimbo),
 > but will be breaking changed and maintained by [YourCraftMC](https://github.com/YourCraftMC).
 
+## Note
+
+Currently, this plugin may output some errors like:
+```console
+[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized format specifier [ip_redactor]
+[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized conversion specifier [ip_redactor] starting at position 27 in conversion pattern.
+[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized format specifier [ip_redactor]
+[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized conversion specifier [ip_redactor] starting at position 67 in conversion pattern.
+[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized format specifier [ip_redactor]
+[XX:XX:XX Error] ... Thread-0 ERROR Unrecognized conversion specifier [ip_redactor] starting at position 64 in conversion pattern.
+[XX:XX:XX Error] ... Thread-0 WARN The use of package scanning to locate Log4j plugins is deprecated.
+Please remove the deprecated `PluginManager.addPackage()` method call from `net.raphimc.viaproxy.util.logging.Logger.<clinit>(Logger.java:35)`.
+See https://logging.apache.org/log4j/2.x/faq.html#package-scanning for details.
+```
+This is caused by the ViaProxy's Log4j2 configuration, 
+which is not compatible with the ViaLimboService's Log4j2 configuration,
+but it does not affect the functionality of the plugin, **just ignore it**.
+
 ## Acknowledgements & Supports
 
 Many thanks to [LoohpJames(@LOOHP)](https://github.com/LOOHP)

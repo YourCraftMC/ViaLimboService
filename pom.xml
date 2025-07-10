@@ -11,6 +11,9 @@
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 
         <deps.limbo.version>1.0.1</deps.limbo.version>
+        <deps.viaproxy.version>3.4.4-SNAPSHOT</deps.viaproxy.version>
+
+        <minecraft.version>1.21.7</minecraft.version>
     </properties>
     <groupId>com.loohp</groupId>
     <artifactId>ViaLimboService</artifactId>
@@ -92,13 +95,13 @@
         <dependency>
             <groupId>cn.ycraft</groupId>
             <artifactId>limboservice</artifactId>
-            <version>1.0.1</version>
+            <version>${deps.limbo.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.raphimc</groupId>
             <artifactId>ViaProxy</artifactId>
-            <version>3.4.4-SNAPSHOT</version>
+            <version>${deps.viaproxy.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
@@ -227,7 +230,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <finalName>${project.name}-${project.version}</finalName>
+                    <finalName>${project.name}-${project.version}-mc${minecraft.version}</finalName>
                     <outputDirectory>${project.basedir}/.asset/</outputDirectory>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <filters>
