@@ -7,6 +7,15 @@ integrating [ViaProxy](https://github.com/ViaVersion/ViaProxy) for more Minecraf
 > This project is forked from [LOOHP's ViaLimbo](https://github.com/LOOHP/ViaLimbo),
 > but will be breaking changed and maintained by [YourCraftMC](https://github.com/YourCraftMC).
 
+
+## Usage
+
+This is a [LimboService](https://github.com/YourCraftMC/LimboService) plugin, you need to install it on your LimboService server.
+
+1. Download the latest release from the [Releases](https://github.com/YourCraftMC/ViaLimboService/releases/latest).
+2. Place the downloaded JAR file into the `plugins` folder of your LimboService server.
+3. Restart your LimboService server to load the plugin.
+
 ## Note
 
 Currently, this plugin may output some errors like:
