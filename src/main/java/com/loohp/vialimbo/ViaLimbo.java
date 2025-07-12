@@ -17,27 +17,25 @@ import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.lenni0451.optconfig.ConfigLoader;
 import net.lenni0451.optconfig.provider.ConfigProvider;
-import net.lenni0451.reflect.Agents;
+import net.raphimc.netminecraft.packeta.PacketTypes;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
 import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.ClassLoaderPriorityUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.Filter;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.filter.AbstractFilter;
-import org.geysermc.mcprotocollib.network.server.NetworkServer;
-import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.Set;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.filter.AbstractFilter;
+import org.geysermc.mcprotocollib.network.server.NetworkServer;
 
 public class ViaLimbo extends LimboPlugin implements Listener {
 
@@ -134,6 +132,10 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             config.setTargetVersion(ProtocolVersion.getClosest(minecraftVersion));
             config.setPassthroughBungeecordPlayerInfo(bungeecord);
             config.setAllowLegacyClientPassthrough(true);
+            if (bungeecord) {
+                config.setCompressionThreshold(-1);
+            }
+            config.setProxyOnlineMode(ServerConfig.SERVER.ONLINE_MODE.getNotNull() && !bungeecord);
 
             ViaProxy.EVENT_MANAGER.register(new ViaProxyListener());
 
@@ -173,7 +175,7 @@ public class ViaLimbo extends LimboPlugin implements Listener {
                 ByteBuf buf = channel.alloc().buffer();
                 if (socketAddress instanceof InetSocketAddress) {
                     buf.writeBoolean(true);
-                    MinecraftTypes.writeString(buf, ((InetSocketAddress) socketAddress).getAddress().getHostAddress());
+                    PacketTypes.writeString(buf, ((InetSocketAddress) socketAddress).getAddress().getHostAddress());
                 } else {
                     buf.writeBoolean(false);
                 }
