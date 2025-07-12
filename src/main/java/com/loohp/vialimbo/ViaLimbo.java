@@ -17,7 +17,7 @@ import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.lenni0451.optconfig.ConfigLoader;
 import net.lenni0451.optconfig.provider.ConfigProvider;
-import net.raphimc.netminecraft.packeta.PacketTypes;
+import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
