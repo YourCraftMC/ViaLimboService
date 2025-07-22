@@ -54,9 +54,9 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             new LimboRunnable() {
                 @Override
                 public void run() {
-                    String minecraftVersion = null;
+                    int protocolVersion = -1;
                     try {
-                        minecraftVersion = (String) Limbo.class.getField("SERVER_IMPLEMENTATION_VERSION").get(Limbo.getInstance());
+                        protocolVersion = (int) Limbo.class.getField("SERVER_IMPLEMENTATION_PROTOCOL").get(null);
                     } catch (IllegalAccessException | NoSuchFieldException e) {
                         throw new RuntimeException(e);
                     }
@@ -70,7 +70,7 @@ public class ViaLimbo extends LimboPlugin implements Listener {
                         channelField.setAccessible(true);
                         io.netty.channel.Channel channel = (io.netty.channel.Channel) channelField.get(server);
                         int limboPort = ((InetSocketAddress) channel.localAddress()).getPort();
-                        startViaProxy(ip, port, minecraftVersion, limboPort, bungeecord);
+                        startViaProxy(ip, port,protocolVersion, limboPort, bungeecord);
                         cancel();
                     } catch (NoSuchFieldException | IllegalAccessException e) {
                         throw new RuntimeException(e);
@@ -87,7 +87,7 @@ public class ViaLimbo extends LimboPlugin implements Listener {
         stopViaProxy();
     }
 
-    private void startViaProxy(String ip, int port, String minecraftVersion, int limboPort, boolean bungeecord) {
+    private void startViaProxy(String ip, int port, int protocolVersion, int limboPort, boolean bungeecord) {
         try {
             Limbo.getInstance().getConsole().sendMessage("[ViaLimbo] Initializing ViaProxy " + ViaProxy.VERSION + " (" + ViaProxy.IMPL_VERSION + ")");
 
@@ -129,7 +129,7 @@ public class ViaLimbo extends LimboPlugin implements Listener {
 
             config.setBindAddress(new InetSocketAddress(ip, port));
             config.setTargetAddress(new InetSocketAddress("127.0.0.1", limboPort));
-            config.setTargetVersion(ProtocolVersion.getClosest(minecraftVersion));
+            config.setTargetVersion(ProtocolVersion.getProtocol(protocolVersion));
             config.setPassthroughBungeecordPlayerInfo(bungeecord);
             config.setAllowLegacyClientPassthrough(true);
             if (bungeecord) {
