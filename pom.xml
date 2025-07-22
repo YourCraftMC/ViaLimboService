@@ -13,11 +13,11 @@
         <deps.limbo.version>1.0.1</deps.limbo.version>
         <deps.viaproxy.version>3.4.4-SNAPSHOT</deps.viaproxy.version>
 
-        <minecraft.version>1.21.7</minecraft.version>
+        <minecraft.version>1.21.8</minecraft.version>
     </properties>
     <groupId>com.loohp</groupId>
     <artifactId>ViaLimboService</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <scm>
         <connection>scm:git:git@github.com:YourCraftMC/ViaLimboService</connection>
