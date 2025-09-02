@@ -1,5 +1,9 @@
 package com.loohp.vialimbo;
 
+import cc.carm.lib.configuration.source.ConfigurationHolder;
+import cc.carm.lib.configuration.source.option.StandardOptions;
+import cc.carm.lib.configuration.source.yaml.YAMLConfigFactory;
+import cc.carm.lib.configuration.source.yaml.YAMLSource;
 import cn.ycraft.limbo.config.ServerConfig;
 import cn.ycraft.limbo.network.ServerConnection;
 import com.google.common.cache.Cache;
@@ -8,6 +12,10 @@ import com.loohp.limbo.Limbo;
 import com.loohp.limbo.events.Listener;
 import com.loohp.limbo.plugins.LimboPlugin;
 import com.loohp.limbo.scheduler.LimboRunnable;
+import com.loohp.vialimbo.config.ViaLimboServiceConfig;
+import com.viaversion.vialoader.impl.platform.ViaAprilFoolsPlatformImpl;
+import com.viaversion.vialoader.impl.platform.ViaBackwardsPlatformImpl;
+import com.viaversion.vialoader.impl.platform.ViaRewindPlatformImpl;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import net.lenni0451.classtransform.TransformerManager;
@@ -19,11 +27,14 @@ import net.lenni0451.optconfig.ConfigLoader;
 import net.lenni0451.optconfig.provider.ConfigProvider;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.plugins.events.ProtocolTranslatorInitEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaLegacyPlatformImpl;
 import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.ClassLoaderPriorityUtil;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
@@ -38,6 +49,15 @@ import org.apache.logging.log4j.core.filter.AbstractFilter;
 import org.geysermc.mcprotocollib.network.server.NetworkServer;
 
 public class ViaLimbo extends LimboPlugin implements Listener {
+
+    private ConfigurationHolder<YAMLSource> configHolder;
+
+    @Override
+    public void onLoad() {
+        final File file = new File(getDataFolder(), "config.yml");
+        configHolder = YAMLConfigFactory.from(file).option(StandardOptions.PRELOAD, true).build();
+        configHolder.initialize(ViaLimboServiceConfig.class);
+    }
 
     @Override
     public void onEnable() {
@@ -70,7 +90,7 @@ public class ViaLimbo extends LimboPlugin implements Listener {
                         channelField.setAccessible(true);
                         io.netty.channel.Channel channel = (io.netty.channel.Channel) channelField.get(server);
                         int limboPort = ((InetSocketAddress) channel.localAddress()).getPort();
-                        startViaProxy(ip, port,protocolVersion, limboPort, bungeecord);
+                        startViaProxy(ip, port, protocolVersion, limboPort, bungeecord);
                         cancel();
                     } catch (NoSuchFieldException | IllegalAccessException e) {
                         throw new RuntimeException(e);
@@ -180,6 +200,26 @@ public class ViaLimbo extends LimboPlugin implements Listener {
                     buf.writeBoolean(false);
                 }
                 channel.writeAndFlush(buf);
+            }
+        }
+
+        @EventHandler
+        public void onTranslatorInit(ProtocolTranslatorInitEvent event) {
+            event.getPlatformSuppliers().clear();
+            if (ViaLimboServiceConfig.VIA_BACKWARDS.resolve()) {
+                event.registerPlatform(ViaBackwardsPlatformImpl::new);
+            }
+            if (ViaLimboServiceConfig.VIA_REWIND.resolve()) {
+                event.registerPlatform(ViaRewindPlatformImpl::new);
+            }
+            if (ViaLimboServiceConfig.VIA_LEGACY.resolve()) {
+                event.registerPlatform(ViaProxyViaLegacyPlatformImpl::new);
+            }
+            if (ViaLimboServiceConfig.VIA_APRIL_FOOLS.resolve()) {
+                event.registerPlatform(ViaAprilFoolsPlatformImpl::new);
+            }
+            if (ViaLimboServiceConfig.VIA_BEDROCK.resolve()) {
+                event.registerPlatform(ViaBackwardsPlatformImpl::new);
             }
         }
     }
