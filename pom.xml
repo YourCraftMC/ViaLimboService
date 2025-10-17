@@ -17,7 +17,7 @@
     </properties>
     <groupId>com.loohp</groupId>
     <artifactId>ViaLimboService</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <scm>
         <connection>scm:git:git@github.com:YourCraftMC/ViaLimboService</connection>
@@ -155,7 +155,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.1</version>
+                <version>3.14.0</version>
                 <configuration>
                     <source>${project.java.version}</source>
                     <target>${project.java.version}</target>
@@ -178,7 +178,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.12.0</version>
+                <version>3.11.3</version>
                 <configuration>
                     <classifier>javadoc</classifier>
                     <detectJavaApiLink>false</detectJavaApiLink>
