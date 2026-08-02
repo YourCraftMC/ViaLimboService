@@ -4,20 +4,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <properties>
-        <project.java.version>17</project.java.version>
+        <project.java.version>25</project.java.version>
         <maven.compiler.source>${project.java.version}</maven.compiler.source>
         <maven.compiler.target>${project.java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 
-        <deps.limbo.version>1.0.1</deps.limbo.version>
-        <deps.viaproxy.version>3.4.5</deps.viaproxy.version>
+        <deps.limbo.version>1.1.0</deps.limbo.version>
+        <deps.viaproxy.version>3.4.12</deps.viaproxy.version>
 
-        <minecraft.version>1.21.10</minecraft.version>
+        <minecraft.version>26.2</minecraft.version>
     </properties>
     <groupId>com.loohp</groupId>
     <artifactId>ViaLimboService</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 
     <scm>
         <connection>scm:git:git@github.com:YourCraftMC/ViaLimboService</connection>

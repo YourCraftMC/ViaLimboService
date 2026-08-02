@@ -13,9 +13,9 @@ import com.loohp.limbo.events.Listener;
 import com.loohp.limbo.plugins.LimboPlugin;
 import com.loohp.limbo.scheduler.LimboRunnable;
 import com.loohp.vialimbo.config.ViaLimboServiceConfig;
-import com.viaversion.vialoader.impl.platform.ViaAprilFoolsPlatformImpl;
-import com.viaversion.vialoader.impl.platform.ViaBackwardsPlatformImpl;
-import com.viaversion.vialoader.impl.platform.ViaRewindPlatformImpl;
+import com.viaversion.viaaprilfools.ViaAprilFoolsPlatformImpl;
+import com.viaversion.viabackwards.ViaBackwardsPlatformImpl;
+import com.viaversion.viarewind.ViaRewindPlatformImpl;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import net.lenni0451.classtransform.TransformerManager;
@@ -26,14 +26,22 @@ import net.lenni0451.lambdaevents.EventHandler;
 import net.lenni0451.optconfig.ConfigLoader;
 import net.lenni0451.optconfig.provider.ConfigProvider;
 import net.raphimc.netminecraft.packet.PacketTypes;
+import net.raphimc.viabedrock.ViaBedrockPlatformImpl;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ProtocolTranslatorInitEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
-import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaLegacyPlatformImpl;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaLegacyPlatform;
 import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.ClassLoaderPriorityUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.filter.AbstractFilter;
+import org.geysermc.mcprotocollib.network.server.NetworkServer;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -41,12 +49,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.Set;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.Filter;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.filter.AbstractFilter;
-import org.geysermc.mcprotocollib.network.server.NetworkServer;
 
 public class ViaLimbo extends LimboPlugin implements Listener {
 
@@ -213,13 +215,13 @@ public class ViaLimbo extends LimboPlugin implements Listener {
                 event.registerPlatform(ViaRewindPlatformImpl::new);
             }
             if (ViaLimboServiceConfig.VIA_LEGACY.resolve()) {
-                event.registerPlatform(ViaProxyViaLegacyPlatformImpl::new);
+                event.registerPlatform(ViaProxyViaLegacyPlatform::new);
             }
             if (ViaLimboServiceConfig.VIA_APRIL_FOOLS.resolve()) {
                 event.registerPlatform(ViaAprilFoolsPlatformImpl::new);
             }
             if (ViaLimboServiceConfig.VIA_BEDROCK.resolve()) {
-                event.registerPlatform(ViaBackwardsPlatformImpl::new);
+                event.registerPlatform(ViaBedrockPlatformImpl::new);
             }
         }
     }
