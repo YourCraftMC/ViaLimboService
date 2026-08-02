@@ -16,6 +16,7 @@ import com.loohp.vialimbo.config.ViaLimboServiceConfig;
 import com.viaversion.viaaprilfools.ViaAprilFoolsPlatformImpl;
 import com.viaversion.viabackwards.ViaBackwardsPlatformImpl;
 import com.viaversion.viarewind.ViaRewindPlatformImpl;
+import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import net.lenni0451.classtransform.TransformerManager;
@@ -53,6 +54,7 @@ import java.util.Set;
 public class ViaLimbo extends LimboPlugin implements Listener {
 
     private ConfigurationHolder<YAMLSource> configHolder;
+    private volatile boolean started = false;
 
     @Override
     public void onLoad() {
@@ -76,6 +78,9 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             new LimboRunnable() {
                 @Override
                 public void run() {
+                    if (started) {
+                        return;
+                    }
                     int protocolVersion = -1;
                     try {
                         protocolVersion = (int) Limbo.class.getField("SERVER_IMPLEMENTATION_PROTOCOL").get(null);
@@ -86,15 +91,20 @@ public class ViaLimbo extends LimboPlugin implements Listener {
                     if (serverConnection == null) {
                         return;
                     }
-                    NetworkServer server = serverConnection.getServer();
                     try {
+                        NetworkServer server = serverConnection.getServer();
                         Field channelField = NetworkServer.class.getDeclaredField("channel");
                         channelField.setAccessible(true);
-                        io.netty.channel.Channel channel = (io.netty.channel.Channel) channelField.get(server);
-                        int limboPort = ((InetSocketAddress) channel.localAddress()).getPort();
-                        startViaProxy(ip, port, protocolVersion, limboPort, bungeecord);
-                        cancel();
-                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        Object channel = channelField.get(server);
+                        Object localAddress = channel.getClass().getMethod("localAddress").invoke(channel);
+                        int limboPort = ((InetSocketAddress) localAddress).getPort();
+                        started = true;
+                        try {
+                            startViaProxy(ip, port, protocolVersion, limboPort, bungeecord);
+                        } finally {
+                            cancel();
+                        }
+                    } catch (ReflectiveOperationException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -165,7 +175,9 @@ public class ViaLimbo extends LimboPlugin implements Listener {
             loadNettyMethod.setAccessible(true);
             loadNettyMethod.invoke(null);
             ClassLoaderPriorityUtil.loadOverridingJars();
-            ProtocolTranslator.init();
+            if (!Via.isLoaded()) {
+                ProtocolTranslator.init();
+            }
             ViaProxy.startProxy();
 
             Limbo.getInstance().getConsole().sendMessage("[ViaLimbo] ViaProxy listening on /" + ip + ":" + port);

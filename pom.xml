@@ -97,6 +97,15 @@
             <artifactId>limboservice</artifactId>
             <version>${deps.limbo.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <!-- The host provides its own netty-all (4.2.1). Excluding it prevents
+                     the conflicting 4.2.1 netty classes from being shaded next to the
+                     4.2.15 netty bundled inside ViaProxy / pulled by NetMinecraft. -->
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.raphimc</groupId>
@@ -212,7 +221,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -233,6 +242,12 @@
                     <finalName>${project.name}-${project.version}-mc${minecraft.version}</finalName>
                     <outputDirectory>${project.basedir}/.asset/</outputDirectory>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <relocations>
+                        <relocation>
+                            <pattern>io.netty</pattern>
+                            <shadedPattern>net.loohp.vialimbo.libs.io.netty</shadedPattern>
+                        </relocation>
+                    </relocations>
                     <filters>
                         <filter>
                             <artifact>*:*</artifact>
