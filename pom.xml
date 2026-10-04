@@ -11,7 +11,7 @@
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 
         <deps.limbo.version>1.1.0</deps.limbo.version>
-        <deps.viaproxy.version>3.4.12</deps.viaproxy.version>
+        <deps.viaproxy.version>3.4.14</deps.viaproxy.version>
 
         <minecraft.version>26.2</minecraft.version>
     </properties>
